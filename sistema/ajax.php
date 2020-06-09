@@ -5,7 +5,8 @@ session_start();
 
 
       
-if(!empty($_POST)){
+if(!empty($_POST))
+{
     //extraer datos del producto
     
     if($_POST['action'] == 'infoProducto'){
@@ -500,8 +501,108 @@ if(!empty($_POST)){
         echo "error";
         exit;
     }
+
+    //valididacion y cambio de pass
+    if($_POST['action'] == 'chagePass')
+    {
+        if(!empty($_POST['passActual']) && !empty($_POST['passNuevo']))
+        {
+           
+            $password = md5($_POST['passActual']);
+            $newPass = md5($_POST['passNuevo']);         
+            $idUser = $_SESSION['s_iduser'];
+          
+            $code = '';
+            $msg = '';
+            $arrayData = array();
+
+            $query = "SELECT * FROM usuario WHERE clave = '$password' AND idusuario = $idUser ";
+            $querySend = mysqli_query($conection,$query);
+            $result = mysqli_num_rows($querySend);
+            if($result>0)
+            {
+            $queryUpdate = "UPDATE usuario set clave ='$newPass' WHERE idusuario = $idUser ";
+            $queryUpdateSend = mysqli_query($conection,$queryUpdate);
+            mysqli_close($conection);
+            
+                if($queryUpdateSend)
+                {
+                    $code = '00';
+                    $msg = 'su contraseña se ha actualizado con exito';
+                }
+                else
+                {
+                    $code = '02';
+                    $msg = 'No es posibe cambiar su contraseña';
+                }
+            }
+            else
+            {
+                $code = '01';
+                $msg = 'La contraseña actual es incorrecta';
+            } 
+            $arrayData = array('cod' => $code, 'msg' => $msg);
+            echo json_encode($arrayData, JSON_UNESCAPED_UNICODE);
+        }
+        else
+        {
+            echo "error";    
+        }    
+
+    }
+
+    if($_POST['action'] == 'updateDataEmpresa')
+    {
+        if(empty($_POST['txtRut']) || empty($_POST['txtNombre']) || empty($_POST['txtSocial']) || empty($_POST['txtFonoEmpresa']) || empty($_POST['txtEmaiEmpresa']) || empty($_POST['txtDirEmpresa']) || empty($_POST['txtIva']) )
+        {
+            $code = '1';
+            $msg = "Todos los campos son obligatorios";
+        }
+        else
+        {
+            $rutEmpresa = $_POST['txtRut'];
+            $nombreEmpresa = $_POST['txtNombre'];
+            $razonSocial = $_POST['txtSocial'];
+            $fonoEmpresa = intval($_POST['txtFonoEmpresa']);
+            $emailEmpresa = $_POST['txtEmaiEmpresa'];
+            $dirEmpresa = $_POST['txtDirEmpresa'];
+            $iva = $_POST['txtIva'];
+
+            $query = "UPDATE configuracion SET 
+                        rut = '$rutEmpresa' ,
+                        nombre = '$nombreEmpresa' ,
+                        razon_social = '$razonSocial' , 
+                        telefono = '$fonoEmpresa' ,
+                        email = '$emailEmpresa' ,
+                        direccion = '$dirEmpresa' ,
+                        iva = $iva 
+                        WHERE id = 1";
+        
+            $querySend = mysqli_query($conection,$query);
+            mysqli_close($conection);
+
+            if($querySend)
+            {
+                $code = '00';
+                $msg = "Datos actualizados correctamente.";
+           
+            }
+            else
+            {
+                $code = '2';
+                $msg = "Error al actualizar los datos";
+            }
+            
+
+            $arrayData = array('cod' => $code, 'msg' =>  $msg);
+            echo json_encode($arrayData, JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+    }
+    
 }
  
            
 
-
+?>

@@ -25,7 +25,11 @@ else{
 
 
     
-            $query= "Select * from usuario where usuario = '".$user."' and clave = '".$pass."' ";
+            $query ="SELECT u.idusuario, u.nombre, u.correo, u.usuario, r.idrol, r.rol
+                            FROM usuario u
+                            INNER JOIN rol r  
+                            ON u.rol = r.idrol
+                            WHERE  u.usuario = '$user' AND u.clave = '$pass' ";
             $queryconect = mysqli_query($conection,$query);
             mysqli_close($conection);
             $result = mysqli_num_rows($queryconect);
@@ -40,7 +44,8 @@ else{
                 $_SESSION['s_nombre']= $data['nombre'];
                 $_SESSION['s_email']= $data['correo'];
                 $_SESSION['s_user']= $data['usuario'];
-                $_SESSION['s_rol']= $data['rol'];
+                $_SESSION['s_rol']= $data['idrol'];
+                $_SESSION['rol_name']= $data['rol'];
                 header("location: sistema/");
             
             }

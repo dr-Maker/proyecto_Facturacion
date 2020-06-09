@@ -505,6 +505,121 @@ $(document).ready(function(){
         generarPDF(codcliente,nofactura);
     });
 
+    //Validacion misma PASS
+    $('.newPass').keyup(function(){
+        //console.log($(this).val());
+        validePass();
+
+    });
+
+    //FORM Cambiar Contraseña
+    $('#formChagnePass').submit(function(e){
+    e.preventDefault();
+        var passActual = $('#txtPassUser').val();
+        var passNuevo = $('#txtNewPassUser').val();
+     
+        //var confirmPassNuevo = $('#txtNewPassConfirm').val;
+        var action = "chagePass";
+
+    
+        $.ajax({
+            url:'ajax.php',
+            type:'POST',
+            async: true,
+            data: {action:action,passActual:passActual,passNuevo:passNuevo},
+       
+            success: function(response)
+            {
+              
+                
+                if(response != 'error')
+                {
+                    var info = JSON.parse(response);
+                    if(info.cod == '00')
+                    {
+                        $('.alertChangePass').html('<p style="color: green;"> '+info.msg+'</p>')
+                        $('#formChagnePass')[0].reset();
+                    }
+                    else
+                    {
+                        $('.alertChangePass').html('<p style="color: red;"> '+info.msg+'</p>')
+                    }
+                    $('.alertChangePass').slideDown();
+
+
+                }
+                
+            },
+            error: function(error)
+            {
+                console.log(error);
+            }
+       
+        });
+       
+
+    });
+
+    //Form Datos Empresa
+    $('#formEmpresa').submit(function(e){
+        e.preventDefault();
+
+        var rutEmpresa = $('#txtRut').val();
+        var nombreEmpresa = $('#txtNombre').val();
+        var razonSocial = $('#txtSocial').val();
+        var fonoEmpresa = $('#txtFonoEmpresa').val();
+        var emailEmpresa = $('#txtEmaiEmpresa').val();
+        var dirEmpresa = $('#txtDirEmpresa').val();
+        var iva = $('#txtIva').val();
+
+        if(rutEmpresa='' || nombreEmpresa== '' || razonSocial == '' || fonoEmpresa == '' || emailEmpresa == '' || dirEmpresa == '' || iva =='' )
+        {
+            $('.alertFormEmpresa').html('<p style="color:red;">todos los campos son obligatorios</p>');   
+            $('.alertFormEmpresa').slideDown();
+            return false;
+        }
+
+        $.ajax({
+            url:'ajax.php',
+            type:'POST',
+            async: true,
+            data: $('#formEmpresa').serialize(),
+            
+            beforeSend: function()
+            {
+                $('.alertFormEmpresa').slideUp();
+                $('.alertFormEmpresa').html('');
+                $('#formEmpresa input').attr('disabled','disabled');
+
+            },
+
+            success: function(response)
+            {
+                     
+                var info = JSON.parse(response);
+               if(info.cod == '00')
+               {
+                    $('.alertFormEmpresa').html('<p style="color:green;">'+info.msg+'</p>');
+                    $('.alertFormEmpresa').slideDown();
+                   
+                  
+               }
+               else
+               {
+                    $('.alertFormEmpresa').html('<p style="color:red;">'+info.msg+'</p>');
+               }
+                
+               $('.alertFormEmpresa').slideDown();
+               $('#formEmpresa input').removeAttr('disabled');
+            },
+            error: function(error)
+            {
+                console.log(error);
+            }
+       
+        });
+
+    });
 
 }); // fin Ready
 
@@ -756,5 +871,30 @@ function anularFactura(){
 
     })
 
+
+}
+
+function validePass(){
+    var passNuevo = $('#txtNewPassUser').val();
+    var confirmPassNuevo = $('#txtNewPassConfirm').val();
+
+
+    if(passNuevo != confirmPassNuevo)
+    {
+        $('.alertChangePass').html('<p style="color: red;">Las contraseñas no coinciden.</p>');
+        $('.alertChangePass').slideDown();
+        //detiene el proceso 
+        return false;
+    }
+
+    if(passNuevo.length <=6)
+    {
+        $('.alertChangePass').html('<p>La contraseña es muy debil, debe tener 6 caracteres como minimo.</p>');
+        $('.alertChangePass').slideDown();
+        return false;
+    }
+
+    $('.alertChangePass').html('');
+    $('.alertChangePass').slideUp();
 
 }
